@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Projects</title>
+    <link rel="stylesheet" href="/css/bot-projects.css">
+</head>
+<body class="bot-projects">
+    
+    <div class="container">
+        <div class="search-bar">
+            <a href="/" class="back-button">🔙</a>
+            <input type="text" id="search" placeholder="Search bot projects...">
+            <button id="search-button">🔍</button>    
+            <button id="settings-button" class="settings-button">⚙️</button>            
+        </div>
+
+        <div id="settings-menu" class="settings-menu hidden">
+            <h3>Filter by Type</h3>
+            <ul>
+                <li><input type="radio" name="filter" value="all" checked> #All</li>
+                <li><input type="radio" name="filter" value="#Moderator-Bot"> #Moderator-Bot</li>
+                <li><input type="radio" name="filter" value="#Gaming-Bot"> #Gaming-Bot</li>
+                <li><input type="radio" name="filter" value="#AI-Bot"> #AI-Bot</li>
+            </ul>
+        </div>
+
+        <div id="bot-projects-list">
+            
+        </div>
+    </div>
+    
+  <div class="footer">
+    <p>&#169; KCCubes | All Rights Reserved</p>
+  </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const settingsButton = document.getElementById('settings-button');
+            const settingsMenu = document.getElementById('settings-menu');
+            const searchButton = document.getElementById('search-button');
+            const searchInput = document.getElementById('search');
+            const botProjectsList = document.getElementById('bot-projects-list');
+            const filterInputs = document.querySelectorAll('#settings-menu input[name="filter"]');
+
+            settingsButton.addEventListener('click', function () {
+                const isMenuVisible = settingsMenu.classList.contains('visible');
+                if (isMenuVisible) {
+                    settingsMenu.classList.remove('visible');
+                } else {
+                    settingsMenu.classList.add('visible');
+                }
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!settingsButton.contains(event.target) && !settingsMenu.contains(event.target)) {
+                    settingsMenu.classList.remove('visible');
+                }
+            });
+
+            function filterProjects() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedFilter = Array.from(filterInputs).find(input => input.checked).value;
+
+                fetch('data/bot-projects.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        botProjectsList.innerHTML = '';
+                        data.projects.forEach(project => {
+                            const matchesSearch = project.name.toLowerCase().includes(searchTerm) || project.description.toLowerCase().includes(searchTerm);
+                            const matchesFilter = selectedFilter === 'all' || project.type === selectedFilter;
+                            
+                            if (matchesSearch && matchesFilter) {
+                                botProjectsList.innerHTML += `
+                                    <div class="bot-project">
+                                        <h2>${project.name}</h2>
+                                        <div class="type">${project.type}</div>
+                                        <div class="description">${project.description}</div>
+                                        <div class="commands">
+                                            <h3>Commands:</h3>
+                                            <ul>${project.commands.map(cmd => `<li>${cmd}</li>`).join('')}</ul>
+                                        </div>
+                                        <a href="${project.inviteLink}" class="invite-button" target="_blank">Invite Bot</a>
+                                    </div>
+                                `;
+                            }
+                        });
+                    });
+            }
+
+            searchButton.addEventListener('click', filterProjects);
+            filterInputs.forEach(input => input.addEventListener('change', filterProjects));
+            filterProjects();
+        });
+    </script>
+</body>
+</html>
