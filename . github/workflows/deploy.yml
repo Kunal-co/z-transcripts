@@ -31,11 +31,11 @@ jobs:
           TRANSCRIPT_DIR="./transcript"
           for FILE in $TRANSCRIPT_DIR/*; do
             if [[ -f $FILE ]]; then
-              FILE_DATE=$(git log -1 --format=%ct -- $FILE)
-              AGE=$((($CURRENT_DATE - $FILE_DATE) / 86400))
-              if [ $AGE -gt 30 ]; then
+              FILE_MODIFIED_DATE=$(stat -c %Y "$FILE")
+              FILE_AGE=$((($CURRENT_DATE - $FILE_MODIFIED_DATE) / 86400))
+              if [ $FILE_AGE -gt 30 ]; then
                 echo "Deleting $FILE (older than 30 days)"
-                rm -f $FILE
+                rm -f "$FILE"
               fi
             fi
           done
