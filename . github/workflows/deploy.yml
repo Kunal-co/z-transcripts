@@ -29,16 +29,9 @@ jobs:
           echo "Cleaning up old files..."
           CURRENT_DATE=$(date +%s)
           TRANSCRIPT_DIR="./transcript"
-          for FILE in $TRANSCRIPT_DIR/*; do
-            if [[ -f $FILE ]]; then
-              FILE_MODIFIED_DATE=$(stat -c %Y "$FILE")
-              FILE_AGE=$((($CURRENT_DATE - $FILE_MODIFIED_DATE) / 86400))
-              if [ $FILE_AGE -gt 30 ]; then
-                echo "Deleting $FILE (older than 30 days)"
-                rm -f "$FILE"
-              fi
-            fi
-          done
+          echo "Looking for files in $TRANSCRIPT_DIR"
+          ls -l $TRANSCRIPT_DIR  # Debug: List files in the transcript folder
+          find $TRANSCRIPT_DIR -type f -mtime +30 -exec echo "Deleting: {}" \; -exec rm -f {} \;  # Delete files older than 30 days
 
       - name: Deploy to GitHub Pages
         run: |
