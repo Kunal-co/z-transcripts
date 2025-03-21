@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'transcript/**'  # Trigger when files in the transcript folder are changed
+      - 'transcript/**'
 
 jobs:
   deploy:
@@ -23,7 +23,23 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-      
+
+      - name: Clean up old files in the transcript folder
+        run: |
+          echo "Cleaning up old files..."
+          CURRENT_DATE=$(date +%s)
+          TRANSCRIPT_DIR="./transcript"
+          for FILE in $TRANSCRIPT_DIR/*; do
+            if [[ -f $FILE ]]; then
+              FILE_DATE=$(git log -1 --format=%ct -- $FILE)
+              AGE=$((($CURRENT_DATE - $FILE_DATE) / 86400))
+              if [ $AGE -gt 30 ]; then
+                echo "Deleting $FILE (older than 30 days)"
+                rm -f $FILE
+              fi
+            fi
+          done
+
       - name: Deploy to GitHub Pages
         run: |
           git config --global user.name "GitHub Actions"
