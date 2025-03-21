@@ -27,11 +27,17 @@ jobs:
       - name: Clean up old files in the transcript folder
         run: |
           echo "Cleaning up old files..."
-          CURRENT_DATE=$(date +%s)
           TRANSCRIPT_DIR="./transcript"
-          echo "Looking for files in $TRANSCRIPT_DIR"
-          ls -l $TRANSCRIPT_DIR  # Debug: List files in the transcript folder
-          find $TRANSCRIPT_DIR -type f -mtime +30 -exec echo "Deleting: {}" \; -exec rm -f {} \;  # Delete files older than 30 days
+          if [ -d "$TRANSCRIPT_DIR" ]; then
+            echo "Directory $TRANSCRIPT_DIR exists."
+            echo "Looking for files in $TRANSCRIPT_DIR"
+            ls -l $TRANSCRIPT_DIR
+            echo "Finding files older than 30 days..."
+            find $TRANSCRIPT_DIR -type f -mtime +30 -exec echo "Deleting: {}" \; -exec rm -f {} \;
+            echo "Cleanup complete."
+          else
+            echo "Directory $TRANSCRIPT_DIR does not exist. Exiting."
+          fi
 
       - name: Deploy to GitHub Pages
         run: |
